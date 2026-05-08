@@ -64,6 +64,17 @@ Agents should ask for human confirmation before:
 - Changing risk classification rules.
 - Replacing the feature workflow.
 
+## Available Skills
+
+This harness ships with Claude Code skills that agents can invoke:
+
+- `/harness` — full intake → classify → story → validate → implement workflow
+- `/today` — daily standup: review → plan → blockers → focus → wrap-up
+- `/meet` — extract decisions, actions, and context from meeting notes
+
+These complement the harness docs. Agents should load `/harness` for non-trivial
+implementation work to stay inside the intake gate.
+
 ## Done Definition
 
 A task is done only when:

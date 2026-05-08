@@ -29,11 +29,16 @@ a real project supplies one.
 
 - `AGENTS.md`: agent entrypoint and operating rules.
 - `docs/HARNESS.md`: human-agent collaboration model.
-- `docs/FEATURE_INTAKE.md`: tiny, normal, and high-risk work classification.
+- `docs/FEATURE_INTAKE.md`: tiny, normal, and high-risk work classification,
+  now with **Design Tree Interview** — agent interviews user branch-by-branch
+  to resolve dependencies before classifying work.
 - `docs/ARCHITECTURE.md`: generic architecture discovery and boundary rules.
 - `docs/HARNESS_BACKLOG.md`: proposed harness improvements.
 - `docs/templates/`: reusable spec-intake, story, decision, and validation
-  templates.
+  templates including high-risk story folder.
+- `.claude/skills/`: Claude Code skills — `/harness` (full intake workflow),
+  `/today` (daily standup), `/meet` (meeting notes extractor).
+- `.claude/Harness.md`: lightweight entrypoint loaded via CLAUDE.md.
 
 ## Repository Structure
 
@@ -41,6 +46,17 @@ a real project supplies one.
 project/
   AGENTS.md
   README.md
+  .claude/
+    Harness.md
+    skills/
+      harness/
+        SKILL.md
+        references/
+        templates/
+      today/
+        SKILL.md
+      meet/
+        SKILL.md
   docs/
     HARNESS.md
     FEATURE_INTAKE.md
