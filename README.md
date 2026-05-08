@@ -1,44 +1,76 @@
 # harness-experimental
 
+A reusable collaboration harness that helps humans and agents turn specs into
+safe, validated work.
+
+**Forked from [hoangnb24/harness-experimental](https://github.com/hoangnb24/harness-experimental)**
+with enhancements for Claude Code integration.
+
+## What's New in This Fork
+
+- **Design Tree Interview** — agent interviews user branch-by-branch to resolve
+  dependencies before writing any code. Integrated into the intake flow.
+- **Claude Code skills** — `/harness` (full intake-to-implement workflow),
+  `/today` (daily standup), `/meet` (meeting notes extractor).
+- **Lightweight entrypoint** — `.claude/Harness.md` loads via `CLAUDE.md` for
+  always-on harness awareness.
+
 ## Current State
 
-This repository is in Harness v0.
+Harness v0. No application implementation, no baked-in product spec.
+The harness provides: file structure, agent operating model, feature intake
+process, story templates, and validation expectations.
 
-There is no application implementation and no baked-in product specification
-yet. The current work is the reusable project harness: the file structure,
-agent operating model, feature intake process, story templates, and validation
-expectations that help humans and agents turn a future user-provided spec into
-implementation work.
+## Mental Model
 
-## Product Sources
+```text
+Human intent → Design Tree Interview → Feature Intake → Story Packet
+    → Agent Work Loop → Product Delta → Validation Proof → Harness Delta
+```
 
-No product contract is currently defined.
+Every task produces two outputs:
+1. **Product delta** — code, tests, API shape, data model, docs.
+2. **Harness delta** — templates, validation expectations, decisions, backlog
+   items that make the next task easier.
 
-When a user provides a project specification, add or reference it as the input
-spec for the first buildout, then derive smaller living artifacts from it:
+## Design Tree Interview
 
-- `docs/product/`: current product contract files, created from the spec.
-- `docs/stories/`: story packets and backlog created from selected work.
-- `docs/TEST_MATRIX.md`: behavior-to-proof control panel.
-- `docs/decisions/`: durable decisions and tradeoffs.
+When input is ambiguous or involves multiple decisions, the agent interviews
+the user before classifying work:
 
-Do not keep a project-specific spec or product breakdown in this harness until
-a real project supplies one.
+- Ask one question at a time. Follow the tree branch-by-branch.
+- If a question can be answered by exploring the codebase, explore instead.
+- Do not generate code until the tree walk is complete.
 
-## Harness Sources
+This is baked into `docs/FEATURE_INTAKE.md` as a step before classification.
 
-- `AGENTS.md`: agent entrypoint and operating rules.
-- `docs/HARNESS.md`: human-agent collaboration model.
-- `docs/FEATURE_INTAKE.md`: tiny, normal, and high-risk work classification,
-  now with **Design Tree Interview** — agent interviews user branch-by-branch
-  to resolve dependencies before classifying work.
-- `docs/ARCHITECTURE.md`: generic architecture discovery and boundary rules.
-- `docs/HARNESS_BACKLOG.md`: proposed harness improvements.
-- `docs/templates/`: reusable spec-intake, story, decision, and validation
-  templates including high-risk story folder.
-- `.claude/skills/`: Claude Code skills — `/harness` (full intake workflow),
-  `/today` (daily standup), `/meet` (meeting notes extractor).
-- `.claude/Harness.md`: lightweight entrypoint loaded via CLAUDE.md.
+## Source-of-Truth Reading Order
+
+1. `AGENTS.md` — entrypoint and operating rules
+2. `docs/HARNESS.md` — human-agent collaboration model
+3. `docs/FEATURE_INTAKE.md` — intake gate + design tree + risk lanes
+4. User spec or prompt
+5. `docs/product/` — product contracts
+6. `docs/ARCHITECTURE.md` — architecture discovery rules
+7. `docs/stories/` — story packets and backlog
+8. `docs/TEST_MATRIX.md` — behavior-to-proof control panel
+9. `docs/decisions/` — durable decisions and tradeoffs
+
+## Three Risk Lanes
+
+| Lane | When | Requirements |
+|------|------|-------------|
+| **Tiny** | Typos, copy, narrow edits | Patch directly, keep docs current |
+| **Normal** | Story-sized behavior | Story packet, validation, vertical slice |
+| **High-Risk** | Auth, data, security, multi-platform | Full story folder + human confirmation |
+
+## Claude Code Skills
+
+| Skill | Use when |
+|-------|---------|
+| `/harness` | Non-trivial implementation — full intake → story → validate → implement |
+| `/today` | Start/end of session — review → plan → blockers → focus → wrap-up |
+| `/meet` | Paste meeting notes — extract decisions, actions, open questions |
 
 ## Repository Structure
 
@@ -47,62 +79,57 @@ project/
   AGENTS.md
   README.md
   .claude/
-    Harness.md
+    Harness.md              ← lightweight entrypoint for CLAUDE.md
     skills/
-      harness/
-        SKILL.md
-        references/
-        templates/
-      today/
-        SKILL.md
-      meet/
-        SKILL.md
+      harness/              ← full intake workflow skill
+      today/                ← daily standup skill
+      meet/                 ← meeting notes skill
   docs/
-    HARNESS.md
-    FEATURE_INTAKE.md
-    ARCHITECTURE.md
-    TEST_MATRIX.md
-    HARNESS_BACKLOG.md
-    product/
-    stories/
-    decisions/
-    templates/
+    HARNESS.md              ← collaboration model
+    FEATURE_INTAKE.md       ← intake gate + design tree + risk lanes
+    ARCHITECTURE.md         ← architecture discovery rules
+    TEST_MATRIX.md          ← proof control panel
+    HARNESS_BACKLOG.md      ← harness growth proposals
+    product/                ← product contracts
+    stories/                ← story packets, backlog
+    decisions/              ← durable decisions
+    templates/              ← story, decision, spec-intake, validation
   scripts/
     README.md
 ```
 
+## Install
+
+From a target project directory:
+
+```bash
+curl -fsSL "https://raw.githubusercontent.com/loversky02/harness-experimental/main/scripts/install-harness.sh?$(date +%s)" | bash -s -- --yes
+```
+
+With conflict resolution:
+
+```bash
+# Keep existing files, add only missing harness files
+curl -fsSL "https://raw.githubusercontent.com/loversky02/harness-experimental/main/scripts/install-harness.sh?$(date +%s)" | bash -s -- --merge --yes
+
+# Back up and replace AGENTS.md, docs/, scripts/
+curl -fsSL "https://raw.githubusercontent.com/loversky02/harness-experimental/main/scripts/install-harness.sh?$(date +%s)" | bash -s -- --override --yes
+
+# Install into a specific path
+curl -fsSL "https://raw.githubusercontent.com/loversky02/harness-experimental/main/scripts/install-harness.sh?$(date +%s)" | bash -s -- --directory /path/to/project --yes
+```
+
+Use `--dry-run` to preview changes. The installer itself is not copied into
+the target project.
+
 ## Working Rule
 
-Implementation prompts do not go straight to code. They first pass through
-feature intake, become story-sized work when needed, and then carry both
-product validation and harness maintenance expectations.
+Implementation prompts do not go straight to code. They pass through the
+intake gate, become story-sized work when needed, and carry both product
+validation and harness maintenance expectations.
 
-## Install Harness Into A Project
+## Growth Rule
 
-From a target project directory, run:
-
-```bash
-curl -fsSL "https://raw.githubusercontent.com/hoangnb24/harness-experimental/main/scripts/install-harness.sh?$(date +%s)" | bash -s -- --yes
-```
-
-If the target already has `AGENTS.md`, `docs/`, or `scripts/`, choose one:
-
-```bash
-# Keep existing files and add only missing Harness files
-curl -fsSL "https://raw.githubusercontent.com/hoangnb24/harness-experimental/main/scripts/install-harness.sh?$(date +%s)" | bash -s -- --merge --yes
-
-# Back up and replace AGENTS.md, docs/, and scripts/
-curl -fsSL "https://raw.githubusercontent.com/hoangnb24/harness-experimental/main/scripts/install-harness.sh?$(date +%s)" | bash -s -- --override --yes
-```
-
-Or install into a specific path:
-
-```bash
-curl -fsSL "https://raw.githubusercontent.com/hoangnb24/harness-experimental/main/scripts/install-harness.sh?$(date +%s)" | bash -s -- --directory /path/to/project --yes
-```
-
-If the target already contains `AGENTS.md`, `docs/`, or `scripts/`, interactive
-installs ask whether to `1. Merge`, `2. Override`, or `3. Stop`. Non-interactive
-installs using `--yes` stop before writing unless `--merge` or `--override` is
-provided. Use `--dry-run` to preview changes. The installer itself and this
-repository's installer story are not copied into the target project.
+The harness grows from friction. When an agent is confused, repeats manual
+reasoning, or discovers a missing rule, it improves the harness or adds a
+proposal to `HARNESS_BACKLOG.md`.
