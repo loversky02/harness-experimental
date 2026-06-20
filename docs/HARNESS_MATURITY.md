@@ -314,3 +314,16 @@ deterministic proposal generation. The repository may claim H5 partial only
 when those commands and docs are present and validated; it must not claim full
 H5 until benchmark runs or trace outcomes prove the proposal loop improves the
 harness over time.
+
+## Phase 6 Interpretation
+
+Phase 6 makes structural enforcement mechanical and aligns the skill with real
+capability. It adds `scripts/harness-fitness.sh` — static repository invariants
+(skeleton files, gap-free migrations, managed `HARNESS:BEGIN/END` blocks,
+internal link integrity, drift markers) — and runs it as a CI gate
+(`.github/workflows/harness-fitness.yml`), so structural violations block a PR
+instead of relying on prose. This complements the H5 durable-layer loop
+(`harness-cli audit` / `harness-cli propose`) rather than duplicating it. It
+does not raise the achieved level on its own: it converts the H1 scaffolding
+invariants from advisory to enforced, and removes the skill's under-reporting of
+H4/H5 capability (ADR 0006).

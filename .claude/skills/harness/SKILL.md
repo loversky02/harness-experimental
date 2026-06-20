@@ -81,6 +81,23 @@ intake (**harness**) → analysis (**bmad-bridge** analyst → brief) → planni
 - Missing harness capabilities added to HARNESS_BACKLOG
 - Final response says what changed and what was not attempted
 
+## Durable Layer & Self-Evolution
+
+When a project ships the Harness CLI (`scripts/bin/harness-cli`), operational
+records live in a SQLite durable layer, not hand-edited markdown. Use it when
+present:
+
+- `harness-cli intake` / `story` / `decision` / `trace` — record work as data
+- `harness-cli query matrix | traces | friction | stats | tools` — read state
+- `harness-cli verify <story>` / `score-trace` — mechanical proof + trace quality
+- `harness-cli intervention add` — log a human/reviewer/CI override distinctly
+- `harness-cli audit` — drift checks + entropy score (durable-layer health)
+- `harness-cli propose` — generate harness-improvement proposals from patterns
+
+Enforcement is mechanical, not prose: `scripts/harness-fitness.sh` gates static
+repo invariants in CI (`references/HARNESS_MATURITY.md`, Phase 6). An absent CLI
+or tool is a clean skip, never a failure.
+
 ## Source-of-Truth Reading Order
 
 1. README.md (project status)

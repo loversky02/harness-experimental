@@ -138,6 +138,10 @@ one Runtime Substrate responsibility.
 | `.github/ISSUE_TEMPLATE/pattern-request.md` | Entropy auditing | Intervention recording |
 | `.github/ISSUE_TEMPLATE/real-world-example.md` | Project memory | Intervention recording |
 | `.github/workflows/harness-cli-release.yml` | Verification | Tool access |
+| `.github/workflows/harness-fitness.yml` | Permissions | Verification, entropy auditing |
+| `scripts/harness-fitness.sh` | Permissions | Entropy auditing, verification |
+| `scripts/schema/005-tool-extensions.sql` | Tool access | Permissions |
+| `docs/decisions/0006-harness-fitness-and-evolution.md` | Project memory | Permissions, entropy auditing |
 
 ## Coverage Summary
 
@@ -165,3 +169,9 @@ Phase 5 converts tool access, entropy auditing, and intervention recording into
 covered responsibilities with a registry, drift audit, proposal loop, and
 intervention schema. Later phases should focus on benchmark ingestion,
 component-level attribution, permission enforcement, and tool usage analytics.
+
+Phase 6 adds a static-structure fitness gate (`scripts/harness-fitness.sh` plus
+`.github/workflows/harness-fitness.yml`) that enforces the H1 scaffolding
+invariants mechanically at PR time, moving Permissions from instruction-level
+toward enforced. Durable-layer drift stays the job of `harness-cli audit`; the
+fitness gate covers repository structure the audit does not see.

@@ -1,0 +1,43 @@
+name: Harness Fitness
+
+# Mechanical enforcement of static harness invariants. The harness's operating
+# rules live in markdown, but structural compliance is checked here so a
+# violation blocks the PR instead of relying on an agent reading the prose.
+#
+# This gates repository structure. Durable-layer drift/entropy is analysed by
+# `harness-cli audit`, run informationally below when a CLI binary is present.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "docs/**"
+      - "scripts/**"
+      - ".claude/**"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - ".github/workflows/harness-fitness.yml"
+  workflow_dispatch:
+
+jobs:
+  fitness:
+    name: Harness fitness checks
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Static harness invariants (gate)
+        run: bash scripts/harness-fitness.sh
+
+      - name: Durable-layer audit (informational)
+        if: always()
+        run: |
+          if [ -x scripts/bin/harness-cli ]; then
+            scripts/bin/harness-cli audit || true
+            scripts/bin/harness-cli propose || true
+          else
+            echo "harness-cli not present in checkout — skipping durable-layer audit."
+            echo "(audit/propose run where the prebuilt CLI is installed.)"
+          fi
