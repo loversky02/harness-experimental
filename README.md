@@ -8,10 +8,12 @@ with enhancements for Claude Code integration.
 
 ## What's New in This Fork
 
-- **Design Tree Interview** — agent interviews user branch-by-branch to resolve
-  dependencies before writing any code. Integrated into the intake flow.
 - **Claude Code skills** — `/harness` (full intake-to-implement workflow),
   `/today` (daily standup), `/meet` (meeting notes extractor).
+- **Skill orchestration (conductor model)** — `/harness` classifies scale, then
+  delegates each phase to the one skill that owns it (bmad-bridge, khuym,
+  vibecode, ck-*); tiers escalate, they don't stack. See
+  `.claude/skills/harness/references/ORCHESTRATION.md`.
 - **Lightweight entrypoint** — `.claude/Harness.md` loads via `CLAUDE.md` for
   always-on harness awareness.
 
@@ -42,7 +44,7 @@ integration:
 ## Mental Model
 
 ```text
-Human intent → Design Tree Interview → Feature Intake → Story Packet
+Human intent → Feature Intake → Story Packet
     → Agent Work Loop → Product Delta → Validation Proof → Harness Delta
 ```
 
@@ -51,22 +53,25 @@ Every task produces two outputs:
 2. **Harness delta** — templates, validation expectations, decisions, backlog
    items that make the next task easier.
 
-## Design Tree Interview
+## Skill Orchestration (Conductor Model)
 
-When input is ambiguous or involves multiple decisions, the agent interviews
-the user before classifying work:
+The harness is the **conductor** for all non-trivial work: it classifies scale,
+then delegates each phase to the one skill that owns that domain — never running
+two overlapping skills for the same step (tiers escalate, they don't stack).
 
-- Ask one question at a time. Follow the tree branch-by-branch.
-- If a question can be answered by exploring the codebase, explore instead.
-- Do not generate code until the tree walk is complete.
+Unified pipeline (scale-gated): intake (**harness**) → analysis (**bmad-bridge**)
+→ planning (**bmad-bridge** / **ck-plan**) → risk (**ck-predict**, **ck-scenario**)
+→ solutioning (**bmad-bridge** architect) → align (**bmad-bridge** PO) + feasibility
+(**khuym**) → story → execute (**khuym** / **vibecode**) → review (**code-review**
++ **ck-security** + **bmad-bridge** QA gate) → learn (**khuym**).
 
-This is baked into `docs/FEATURE_INTAKE.md` as a step before classification.
+Full domain map and tie-breakers: `.claude/skills/harness/references/ORCHESTRATION.md`.
 
 ## Source-of-Truth Reading Order
 
 1. `AGENTS.md` — entrypoint and operating rules
 2. `docs/HARNESS.md` — human-agent collaboration model
-3. `docs/FEATURE_INTAKE.md` — intake gate + design tree + risk lanes
+3. `docs/FEATURE_INTAKE.md` — intake gate + risk lanes
 4. User spec or prompt
 5. `docs/product/` — product contracts
 6. `docs/ARCHITECTURE.md` — architecture discovery rules
@@ -104,7 +109,7 @@ project/
       meet/                 ← meeting notes skill
   docs/
     HARNESS.md              ← collaboration model
-    FEATURE_INTAKE.md       ← intake gate + design tree + risk lanes
+    FEATURE_INTAKE.md       ← intake gate + risk lanes
     ARCHITECTURE.md         ← architecture discovery rules
     TEST_MATRIX.md          ← proof control panel
     HARNESS_BACKLOG.md      ← harness growth proposals

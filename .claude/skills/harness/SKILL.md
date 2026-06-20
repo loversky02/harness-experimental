@@ -32,17 +32,31 @@ Create/update a story from `templates/story.md`. Link product docs. Add validati
 ### High-Risk
 Create story folder from `templates/high-risk-story/`. Fill execplan, overview, design, validation. Ask human confirmation before implementation. Record a decision.
 
-## Connecting With Existing Skills
+## Connecting With Existing Skills — harness is the conductor
 
-| Phase | Skills to use |
-|-------|--------------|
-| Explore codebase | `scout`, `explore`, `code-research` |
-| Diagnose issues | `ck-debug`, `ck-scenario` |
-| Implement | `fix` (tiny), `vibecode-kit` (normal+), `backend-development`, `frontend-development` |
-| Review | `code-review`, `ck-security` |
-| Test | `test`, `web-testing` |
-| Plan | `planning`, `ck-plan` |
-| Ship | `ship`, `deploy` |
+harness classifies the work, then **delegates each phase to the ONE skill that
+owns that domain**. Never run two overlapping skills for the same step (tiers
+escalate, they don't stack). Full domain map + tie-breakers: `references/ORCHESTRATION.md`.
+
+**Unified pipeline (scale-gated):**
+intake (**harness**) → analysis (**bmad-bridge** analyst → brief) → planning
+(**bmad-bridge** pm → PRD / **ck-plan**) → risk (**ck-predict**, **ck-scenario**)
+→ solutioning (**bmad-bridge** architect + `docs/adr/`) → align (**bmad-bridge** PO)
++ feasibility (**khuym** validating) → story (harness packet / **vibecode** TIP)
+→ execute (**khuym** swarming/executing or **vibecode** Builder) → review
+(**code-review** + **ck-security** + **bmad-bridge** QA gate) → learn (**khuym** compounding).
+
+| Phase | Default → escalate |
+|-------|--------------------|
+| Explore codebase | `explore` → `scout` → `feature-research` (+ `code-research`) |
+| Plan | `harness` routes → `ck-plan` / `bmad-bridge` (artifacts) / `khuym:planning` |
+| Risk analysis | `ck-scenario` (edge cases), `ck-predict` (5-persona) |
+| Diagnose | `fix` (known cause) → `ck-debug` (root cause) |
+| Implement | `vibecode-kit` (constraint) / `khuym:swarming` (parallel) / `backend-development`, `frontend-development` |
+| Review | `code-review` → `ck-security` (deep) → `bmad-bridge` QA gate (verdict) |
+| Test | `test-driven-development` (test-first discipline) → `test` / `web-testing` (run) |
+| Ship | `ship` → `deploy` / `devops` (by target) |
+| Learn | `khuym:compounding` (machine) · `retro`/`watzup` (human) |
 
 ## Task Loop (Every Task)
 
@@ -75,19 +89,6 @@ Create story folder from `templates/high-risk-story/`. Fill execplan, overview, 
 4. User spec or prompt
 5. docs/product/ (product contracts)
 6. docs/ARCHITECTURE.md (before implementation)
-7. docs/CONTEXT_RULES.md (which context each lane must load)
-8. docs/stories/ (story packets, backlog)
-9. docs/TEST_MATRIX.md (proof status)
-10. docs/decisions/ (why choices were made)
-
-## Durable Layer
-
-Operational records (intake classifications, story status, decisions, backlog,
-execution traces) live in a SQLite durable layer, not hand-edited markdown. The
-Rust Harness CLI is the primary operational tool — use it when present:
-
-- `scripts/bin/harness-cli query matrix` — proof status
-- `scripts/bin/harness-cli query tools --capability <name> --status present` —
-  what external tools are equipped (`references/TOOL_REGISTRY.md`)
-
-An absent tool or capability is a clean skip, never a failure.
+7. docs/stories/ (story packets, backlog)
+8. docs/TEST_MATRIX.md (proof status)
+9. docs/decisions/ (why choices were made)

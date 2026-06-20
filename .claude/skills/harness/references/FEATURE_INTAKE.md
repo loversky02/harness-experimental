@@ -12,9 +12,6 @@ The human does not need to classify risk. The harness does.
 User prompt
     |
     v
-Design tree interview
-    |
-    v
 Classify input type
     |
     v
@@ -29,36 +26,6 @@ Run risk checklist
     v
 Choose lane: tiny, normal, or high-risk
 ```
-
-## Design Tree Interview
-
-When the input is ambiguous, underspecified, or involves multiple decisions,
-interview the user before classifying. Walk down each branch of the design
-tree, resolving dependencies between decisions one by one.
-
-Rules:
-- Ask one question at a time. Do not batch.
-- Each answer unlocks the next branch. Follow the tree, don't jump.
-- If a question can be answered by exploring the codebase, explore instead of asking.
-- Do not generate a plan or write code until the tree walk is complete.
-- Stop when the user says "go ahead" or the remaining branches are implementation details the agent can decide.
-
-Example tree for a "user invites" feature:
-
-```text
-"Who can send invites?"
-  → admin only
-    "What happens when an admin invites someone?"
-      → email sent with link
-        "Does the link expire?"
-        ...
-  → any member
-    "Is there a invite quota per member?"
-    ...
-```
-
-Tiny changes (typos, narrow edits) skip the interview. Normal and high-risk
-work should run at least one round of tree-walk before classification.
 
 ## Input Types
 
@@ -92,8 +59,6 @@ smoke proof, not a public contract escalation by itself.
 
 Requirements:
 
-- Record the intake row before implementation; tiny work skips story packet
-  overhead, not durable task classification.
 - Patch directly.
 - Keep affected docs current.
 - Run available quick checks.
