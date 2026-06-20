@@ -21,6 +21,24 @@ Harness v0. No application implementation, no baked-in product spec.
 The harness provides: file structure, agent operating model, feature intake
 process, story templates, and validation expectations.
 
+## Now Includes (merged from upstream)
+
+This fork stays in sync with [hoangnb24/harness-experimental][upstream]. The
+following upstream capabilities now ship here on top of the fork's Claude Code
+integration:
+
+- **SQLite durable layer** — `scripts/harness` CLI stores intake
+  classifications, story status, decisions, backlog, and execution traces as
+  data instead of hand-edited markdown (`docs/decisions/0004-sqlite-durable-layer.md`).
+- **Rust Harness CLI** — `scripts/bin/harness-cli` is the primary operational
+  tool, distributed as a prebuilt, checksum-verified binary.
+- **Tool Registry** — register optional external tools as capability providers;
+  an absent tool is a clean skip, never a failure (`docs/TOOL_REGISTRY.md`).
+- **Demo walkthrough** — `docs/demo/` shows a product idea moving through
+  intake → contracts → story → validation → decisions.
+
+[upstream]: https://github.com/hoangnb24/harness-experimental
+
 ## Mental Model
 
 ```text
