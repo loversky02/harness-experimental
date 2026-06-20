@@ -11,11 +11,12 @@ use crate::application::{
     MigrateResult, QueryTable, StoryAddInput, StoryUpdateInput, ToolRegisterInput, TraceInput,
 };
 use crate::domain::{
-    normalize_capability, parse_optional_integer, parse_tool_args, proof_display,
-    validate_responsibility, validate_tool_kind, BacklogFilter, BacklogRecord, BoolFlag,
-    ContextScoreResult, CsvList, DecisionRecord, FrictionRecord, HarnessStats, ImprovementProposal,
-    InputType, IntakeRecord, InterventionRecord, RiskLane, StoryMatrixRecord, StoryVerifyAllResult,
-    ToolEntry, TraceQualityTier, TraceRecord, TraceScoreResult, RISK_LANE_HELP,
+    audit_gate_ceiling, audit_gate_exceeded, normalize_capability, parse_optional_integer,
+    parse_tool_args, proof_display, validate_responsibility, validate_tool_kind, BacklogFilter,
+    BacklogRecord, BoolFlag, ContextScoreResult, CsvList, DecisionRecord, FrictionRecord,
+    HarnessStats, ImprovementProposal, InputType, IntakeRecord, InterventionRecord, RiskLane,
+    StoryMatrixRecord, StoryVerifyAllResult, ToolEntry, TraceQualityTier, TraceRecord,
+    TraceScoreResult, RISK_LANE_HELP,
 };
 use crate::infrastructure::ToolCheckResult;
 
@@ -55,7 +56,7 @@ enum Command {
     /// Score trace context reads against CONTEXT_RULES.md.
     ScoreContext { trace_id: String },
     /// Run drift audit and entropy score.
-    Audit,
+    Audit(AuditArgs),
     /// Generate improvement proposals from observed patterns.
     Propose(ProposeArgs),
     /// Query harness data.
@@ -349,6 +350,16 @@ struct ProposeArgs {
 }
 
 #[derive(Args, Debug)]
+struct AuditArgs {
+    /// Fail with a non-zero exit when the entropy score exceeds this ceiling (0-100).
+    #[arg(long = "max-entropy", value_name = "N")]
+    max_entropy: Option<i64>,
+    /// Fail on any drift at all. Equivalent to --max-entropy 0.
+    #[arg(long)]
+    strict: bool,
+}
+
+#[derive(Args, Debug)]
 struct QueryArgs {
     #[command(subcommand)]
     view: QueryView,
@@ -433,6 +444,8 @@ pub enum InterfaceError {
     CurrentDir(std::io::Error),
     #[error("query sql requires a SQL statement")]
     EmptySql,
+    #[error("entropy gate failed: score {score}/100 exceeds --max-entropy {max}")]
+    EntropyGate { score: i64, max: i64 },
 }
 
 pub fn run(cli: Cli) -> Result<(), InterfaceError> {
@@ -640,7 +653,18 @@ pub fn run(cli: Cli) -> Result<(), InterfaceError> {
                 .expect("value provided");
             print_context_score(&service.score_context(id)?);
         }
-        Command::Audit => print_audit(&service.audit()?),
+        Command::Audit(args) => {
+            let result = service.audit()?;
+            print_audit(&result);
+            let ceiling = audit_gate_ceiling(args.strict, args.max_entropy);
+            let score = result.entropy_score();
+            if audit_gate_exceeded(score, ceiling) {
+                return Err(InterfaceError::EntropyGate {
+                    score,
+                    max: ceiling.unwrap_or(0),
+                });
+            }
+        }
         Command::Propose(args) => print_proposals(&service.propose(args.commit)?),
         Command::Query(args) => match args.view {
             QueryView::Matrix(args) => print_matrix(&service.query_matrix()?, args.numeric),

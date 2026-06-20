@@ -31,13 +31,14 @@ jobs:
       - name: Static harness invariants (gate)
         run: bash scripts/harness-fitness.sh
 
-      - name: Durable-layer audit (informational)
-        if: always()
+      - name: Durable-layer entropy gate
         run: |
           if [ -x scripts/bin/harness-cli ]; then
-            scripts/bin/harness-cli audit || true
+            # Real gate: fail when durable-layer entropy exceeds the ceiling.
+            # Tune the ceiling per project with the HARNESS_MAX_ENTROPY env var.
+            scripts/bin/harness-cli audit --max-entropy "${HARNESS_MAX_ENTROPY:-100}"
             scripts/bin/harness-cli propose || true
           else
-            echo "harness-cli not present in checkout — skipping durable-layer audit."
-            echo "(audit/propose run where the prebuilt CLI is installed.)"
+            echo "harness-cli not present in checkout — skipping durable-layer gate."
+            echo "(audit --max-entropy / propose run where the prebuilt CLI is installed.)"
           fi

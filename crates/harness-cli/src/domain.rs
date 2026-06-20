@@ -1069,6 +1069,23 @@ impl AuditResult {
     }
 }
 
+/// Resolve the entropy ceiling for an audit gate. `--strict` forces a ceiling of
+/// zero (fail on any drift); otherwise the explicit `--max-entropy` value, if
+/// any, is used. `None` means "report only, never fail".
+pub fn audit_gate_ceiling(strict: bool, max_entropy: Option<i64>) -> Option<i64> {
+    if strict {
+        Some(0)
+    } else {
+        max_entropy
+    }
+}
+
+/// True when `score` should fail a gate at `ceiling`. A `None` ceiling never
+/// fails (the audit is informational).
+pub fn audit_gate_exceeded(score: i64, ceiling: Option<i64>) -> bool {
+    matches!(ceiling, Some(max) if score > max)
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct ImprovementProposal {
     pub title: String,
@@ -1196,6 +1213,21 @@ pub fn proof_display(value: i64, numeric: bool) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn audit_gate_resolves_ceiling_and_fails_above_it() {
+        // --strict forces a zero ceiling and overrides --max-entropy.
+        assert_eq!(audit_gate_ceiling(false, None), None);
+        assert_eq!(audit_gate_ceiling(false, Some(20)), Some(20));
+        assert_eq!(audit_gate_ceiling(true, None), Some(0));
+        assert_eq!(audit_gate_ceiling(true, Some(50)), Some(0));
+
+        // No ceiling never fails; equal is allowed; above the ceiling fails.
+        assert!(!audit_gate_exceeded(100, None));
+        assert!(!audit_gate_exceeded(20, Some(20)));
+        assert!(audit_gate_exceeded(21, Some(20)));
+        assert!(audit_gate_exceeded(1, Some(0)));
+    }
 
     #[test]
     fn parses_input_type_aliases() {

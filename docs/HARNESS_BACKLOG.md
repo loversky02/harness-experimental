@@ -63,7 +63,11 @@ normal.
 
 ### Status
 
-proposed
+implemented (2026-06-20). `harness-cli audit --max-entropy N` and `--strict`
+exit non-zero above the entropy ceiling; wired into `harness-fitness.yml` as a
+gate where the CLI is installed. Predicted impact (CI can gate on entropy) holds:
+verified by a domain unit test plus an end-to-end exit-code check (score 10 fails
+`--max-entropy 0`, passes `--max-entropy 100`).
 
 ## Missing Harness Capability
 
