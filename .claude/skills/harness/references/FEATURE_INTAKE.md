@@ -72,7 +72,7 @@ lane.
 | Change request | Changing, fixing, or refining accepted behavior | Story packet or direct patch |
 | New initiative | Adding a larger product area that needs multiple stories | Initiative notes plus story packets |
 | Maintenance request | Changing technical, operational, or dependency behavior | Story packet, validation report, or decision |
-| Harness improvement | Improving how humans and agents collaborate | Direct docs update or `docs/HARNESS_BACKLOG.md` |
+| Harness improvement | Improving how humans and agents collaborate | Direct docs update or `scripts/bin/harness-cli backlog add` |
 
 Do not create or extend a monolithic spec by default after intake. Use product
 docs, stories, decisions, and initiative notes as the living surface.
@@ -83,8 +83,17 @@ docs, stories, decisions, and initiative notes as the living surface.
 
 Use for low-risk docs, copy, names, or narrow edits.
 
+Also use for initial project setup when the work is limited to installing
+declared dependencies, wiring a server entrypoint, adding a health/smoke
+endpoint, or opening a local development database connection without creating
+domain schema, CRUD behavior, auth, authorization, provider integration, or
+data migration. A health endpoint in a new benchmark or scaffolded project is
+smoke proof, not a public contract escalation by itself.
+
 Requirements:
 
+- Record the intake row before implementation; tiny work skips story packet
+  overhead, not durable task classification.
 - Patch directly.
 - Keep affected docs current.
 - Run available quick checks.
@@ -100,7 +109,8 @@ Requirements:
 - Link relevant product docs.
 - Add or update validation expectations.
 - Implement the smallest vertical slice when implementation exists.
-- Update `docs/TEST_MATRIX.md`.
+- Record or update proof status with `scripts/bin/harness-cli story add` and
+  `scripts/bin/harness-cli story update`.
 
 ### High-Risk
 
@@ -112,7 +122,11 @@ Requirements:
 - Create a story folder using `docs/templates/high-risk-story/`.
 - Fill in `execplan.md`, `overview.md`, `design.md`, and `validation.md`.
 - Ask for human confirmation before implementation if direction is ambiguous.
-- Record a decision when behavior or architecture changes meaningfully.
+- Record a durable decision when behavior, architecture, authorization, data
+  ownership, API shape, or validation requirements change meaningfully. Use a
+  `docs/decisions/NNNN-*.md` file from `docs/templates/decision.md`, then add
+  or refresh the durable row with `scripts/bin/harness-cli decision add`.
+  Decision text in a trace is not a durable decision record.
 
 ## Risk Checklist
 

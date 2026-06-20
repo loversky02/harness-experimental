@@ -75,6 +75,19 @@ Create story folder from `templates/high-risk-story/`. Fill execplan, overview, 
 4. User spec or prompt
 5. docs/product/ (product contracts)
 6. docs/ARCHITECTURE.md (before implementation)
-7. docs/stories/ (story packets, backlog)
-8. docs/TEST_MATRIX.md (proof status)
-9. docs/decisions/ (why choices were made)
+7. docs/CONTEXT_RULES.md (which context each lane must load)
+8. docs/stories/ (story packets, backlog)
+9. docs/TEST_MATRIX.md (proof status)
+10. docs/decisions/ (why choices were made)
+
+## Durable Layer
+
+Operational records (intake classifications, story status, decisions, backlog,
+execution traces) live in a SQLite durable layer, not hand-edited markdown. The
+Rust Harness CLI is the primary operational tool — use it when present:
+
+- `scripts/bin/harness-cli query matrix` — proof status
+- `scripts/bin/harness-cli query tools --capability <name> --status present` —
+  what external tools are equipped (`references/TOOL_REGISTRY.md`)
+
+An absent tool or capability is a clean skip, never a failure.
